@@ -1,0 +1,290 @@
+<!DOCTYPE HTML>
+<!-- V3.0.0 and modified by Martin -->
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="shrink-to-fit=no">
+		<title>OBS Studio Vision mixer</title>
+		<link rel="shortcut icon" type="image/png" href="images/favicon-32x32.png"/>
+		<style>
+			html {
+			  touch-action: manipulation;
+			}
+			.info{
+				color: rgb(200,200,200);
+				font-size: 0.7rem;
+				width:100%;
+				display:inline-block;
+			}
+			.boutonscene{
+				display: inline-block;
+				width: 100px;
+				height: 100px;
+				background: transparent;
+				background-image: url(images/blank_button.png);
+				border-radius: 8px;
+				border: none;
+				text-align: center;
+				font-weight: bold;
+				padding: 0px 12px;
+				white-space: normal;
+				vertical-align: middle;
+				outline:none;
+				-webkit-tap-highlight-color: transparent;
+				cursor: pointer;
+				font-size: 1rem;
+			}
+			.boutonscene:focus{
+				outline: none;
+				-webkit-tap-highlight-color: transparent;
+			}
+			.colorAUXbutton{
+				background-image: url(images/blank_cyan_button.png);
+				box-shadow: 0px 0px 30px rgb(0,0,255);
+				background-size: 100px 100px;
+			}
+			.colorPGMbutton{
+				background-image: url(images/blank_red_button.png);
+				box-shadow: 0px 0px 30px rgb(255,0,0);
+				background-size: 100px 100px;
+			}
+			.colorPVWbutton{
+				background-image: url(images/blank_green_button.png);
+				box-shadow: 0px 0px 30px rgb(0,255,0);
+				background-size: 100px 100px;
+			}
+			.colorSRCbutton{
+				background-image: url(images/blank_blue_button.png);
+				box-shadow: 0px 0px 30px rgb(0,0,255);
+				background-size: 100px 100px;
+			}
+			.colorTRANSbutton{
+				background-image: url(images/blank_yellow_button.png);
+				box-shadow: 0px 0px 30px rgb(255,255,0);
+				background-size: 100px 100px;
+			}
+			.colorMUTEbutton{
+				background-image: url(images/blank_red_button.png);
+				box-shadow: 0px 0px 30px rgb(255,0,0);
+				background-size: 100px 100px;
+			}
+			.classicbutton{
+				background-color: rgb(34,34,34);
+				background-image: url(images/blank_button.png);
+				background-size: 100px 100px;
+				box-shadow:none;
+			}
+			.transition{
+				float: right;
+			}
+			html, body{
+				background-color: rgb(45,45,45);
+				font-family: Helvetica, Arial, Sans-Serif;
+			}
+			#lesboutons_AUX, #lesboutons_AUX2, #lesboutons_PGM, #lesboutons_PVW, #lesboutons_SRC, #lesboutons_TRANS, #lesboutons_AUDIO{
+				background-color: rgb(34,34,34);
+				display: inline-block;
+				border: 3px solid rgb(25,25,25);
+				border-radius: 10px;
+			}
+			#lesboutons_TRANS, #lesboutons_AUDIO{
+				width: 220px;
+				text-align: center;
+			}
+			.screenShot_Win {
+				display: none;
+				vertical-align: middle;
+				background-color: black;
+			}
+			.pgm_pvw_bars{
+				width: calc(100% - 230px);
+			}
+			@media screen and (max-width: 900px) {
+				#lesboutons_TRANS, #lesboutons_AUDIO{
+					width: 120px;
+				}
+				.pgm_pvw_bars{
+					width: calc(100% - 210px);
+				}
+			}
+			@media screen and (max-width: 790px) {
+				#lesboutons_TRANS, #lesboutons_AUDIO{
+					width: auto;
+				}
+				.pgm_pvw_bars{
+					width: auto;
+				}
+			}
+			h1{
+				color: rgb(105,105,105);
+				font-weight: normal;
+				margin: 5px 0;
+				font-size: 1.7rem;
+			}
+			.titlerotate{
+				transform: rotate(-90deg);
+				display:inline-block;
+				width:30px;
+				height:50px;
+			}
+			.titlerotate > h1{
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			.audioChannel{
+				text-align: center;
+				margin: 10px 0;
+				white-space: normal;
+				outline:none;
+				-webkit-tap-highlight-color: transparent;
+				color: rgb(200,200,200);
+				font-weight: bold;
+			}
+			.alerte{
+				color: rgb(200,0,0);
+			}
+			h3.alerte{
+				font-weight : normal;
+			}
+			.transition_input{
+				background-color: rgba(0,0,0,0);
+				border: 3px solid rgb(25,25,25);
+				padding: 0.2rem;
+				border-radius: 5px;
+				font-weight: bold;
+				color: rgb(200,200,200);
+				vertical-align: middle;
+				font-size: 1.1rem;
+				display: inline-block;
+				width: 70px;
+				text-align: center;
+			}
+			#trans_animation_parent{
+				height: 5px;
+				width: 100%;
+				margin: 5px 0;
+				border: 2px solid black;
+				border-radius: 5px;
+			}
+			#trans_animation_child{
+				height: 100%;
+				width: 0%;
+				background-color: #8a8a8a;
+			}
+			#connect_form{
+				padding: 5%;
+				color: white;
+			}
+			#connect_form label{
+				display:inline-block;
+				width: 200px;
+			}
+			#connect_form input{
+				padding: 10px;
+				font-weight: bold;
+			}
+			.colorfulSelectBtn{
+				height: 50px;
+				width: 80px;
+				clear:both;
+				border-radius: 10px;
+				background-color: rgb(45,45,45);
+				color: rgb(200,200,200);
+			}
+			#connOverlay{
+				position: fixed;
+				display: block;
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background-color: rgba(0,0,0,0.8);
+				z-index: 2;
+				overflow-y: scroll;
+			}
+		</style>
+		<script type="text/javascript" src="obs-websocket.js"></script>
+	</head>
+	<body onload="preInter()">
+		<div>
+			<div id="connOverlay" onclick="exitOverlay()">
+				<form id="connect_form" action="">
+				  <fieldset onclick="event.stopPropagation();">
+					<legend>Connection:</legend>
+					<h2 class="alerte">Error : not connected to OBS</h2><h3 class="alerte">Please make sure OBS is on, with the plugin "obs-websocket" installed.</h3>
+					<label for="ip">IP address :</label>
+					<input type="text" id="ip" name="ip" value="" placeholder="Ex: 192.168.1.17"><br><br>
+					<label for="port">Port :</label>
+					<input type="text" id="port" name="port" value="" placeholder="Ex: 4444"><br><br>
+					<label for="password">Password :</label>
+					<input type="text" id="password" name="password" value="" placeholder="Ex: myp@ssw0rd"> (if authentication is enabled)<br><br>
+					<label for="limit">Max amount of scenes ?</label>
+					<input type="number" id="limit" name="limit" value="0" min="0" max="64"> (0 = unlimited)<br><br>
+					<label for="margin">Margin between buttons ?</label>
+					<input type="number" id="margin" name="margin" value="5" min="0" max="100"> (5 by default)<br><br>
+					<label for="nosleep">Nosleep ?</label>
+					<input type="checkbox" id="nosleep" name="nosleep"> (Keep your smartphone screen from going to sleep)<br><br>
+					<label for="numpad">Numpad input ? (beta)</label>
+					<input type="checkbox" id="numpad" name="numpad"><br><br>
+					<label for="aux">Disable Aux Channel ?</label>
+					<input type="checkbox" id="aux" name="aux" value="off"><br><br>
+					<label for="src">Disable Source Selection ?</label>
+					<input type="checkbox" id="src" name="src" value="off"><br><br>
+					<label for="mute">Disable Mute button ?</label>
+					<input type="checkbox" id="mute" name="mute" value="off"><br><br>
+					<label for="screenshotPreviewProgram">Disable Program / Preview window?</label>
+					<input type="checkbox" id="ssPgm" name="ssPgm" value="off">&nbsp;<input type="checkbox" id="ssPvw" name="ssPvw" value="off"><br><br>
+					<label for="ssFPS">ScreenShot FPS</label>
+					<input type="text" id="ssFPS" name="ssFPS" value="2" placeholder="2"><br><br>
+					<label for="ssSize">ScreenShot Size</label>
+					<input type="text" id="ssSize" name="ssSize" value="20" placeholder="20"><br><br>
+					<br>
+					<input style="padding: 10px;" type="submit" value="Connect to OBS">
+				  </fieldset><br><br><br>
+				</form>
+			</div>
+			<div class="pgm_pvw_bars" id="pgm_pvw_bars" style="display: inline-block;">
+				<div id="screenShot_PGM" class="screenShot_Win" style="border: 2px solid rgb(240,0,0);"></div>
+				<div id="screenShot_PVW" class="screenShot_Win" style="border: 2px solid rgb(0,240,0);"></div>
+				<div class="titlerotate auxrow" style="display: none;"><h1 id="aux_title">AUX</h1></div><div id="lesboutons_AUX" class="auxrow" style="display: none;"></div>
+				<div class="titlerotate aux2row" style="display: none;"><h1 id="aux_title">AUX&nbsp;2</h1></div><div id="lesboutons_AUX2" class="aux2row" style="display: none;"></div>
+				<div class="titlerotate pgmrow"><h1 id="pgm_title">Program</h1></div><div id="lesboutons_PGM" class="pgmrow"></div><br>
+				<div class="titlerotate pvwrow"><h1 id="pvw_title">Preview</h1></div><div id="lesboutons_PVW" class="pvwrow"></div>
+				<div class="titlerotate srcrow"><h1 id="src_title">Source</h1></div><div id="lesboutons_SRC" class="srcrow"></div>
+				<br>
+			</div>
+			<div class="transition">
+				<h1>Transition <input class="transition_input" type="number" name="" id="transition_input" value="500" min="0" max="10000"/></h1>
+				<div id="lesboutons_TRANS">
+					<div id="trans_animation_parent">
+						<div id="trans_animation_child"></div>
+					</div>
+				</div>
+				<h1 id="lesboutons_AUDIO_id">Audio</h1>
+				<div id="lesboutons_AUDIO"></div>
+			</div>
+		</div>
+		<input onclick="fullscreen(this);" style="height: 50px;clear:both; margin: 1rem; border-radius: 10px; background-color: rgb(45,45,45); color: rgb(200,200,200);" type='submit' name='fullscreen' value='fullscreen'/>
+		<button onclick="connPage();" class="colorfulSelectBtn">Settings</button>
+		<br>
+		<button onclick="changecolor('auxbtn');" class="colorfulSelectBtn">AUX</button>
+		<button onclick="changecolor('pgmbtn');" class="colorfulSelectBtn">Program</button>
+		<button onclick="changecolor('pvwbtn');" class="colorfulSelectBtn">Preview</button>
+		<button onclick="changecolor('srcbtn');" class="colorfulSelectBtn">Source</button>
+		<button onclick="changecolor('trnbtn');" class="colorfulSelectBtn">Transition</button>
+		<button onclick="changecolor('mutbtn');" class="colorfulSelectBtn">Mute</button>
+		<br>
+		<button onmousedown="down('auxbtn')" onmouseup="up()" class="colorfulSelectBtn">HueRo</button>
+		<button onmousedown="down('pgmbtn')" onmouseup="up()" class="colorfulSelectBtn">HueRo</button>
+		<button onmousedown="down('pvwbtn')" onmouseup="up()" class="colorfulSelectBtn">HueRo</button>
+		<button onmousedown="down('srcbtn')" onmouseup="up()" class="colorfulSelectBtn">HueRo</button>
+		<button onmousedown="down('trnbtn')" onmouseup="up()" class="colorfulSelectBtn">HueRo</button>
+		<button onmousedown="down('mutbtn')" onmouseup="up()" class="colorfulSelectBtn">HueRo</button>
+		<p class="info"><span id="studio_status"></span><span id="connectedto"></span>Vision Mixer for OBS Sudio</p>
+		<h1 id="strRec"></h1>
+		<script type="text/javascript" src="NoSleep.min.js"></script>
+		<script type="text/javascript" src="obsvisionmixer.js"></script>
+</html>

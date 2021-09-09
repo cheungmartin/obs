@@ -1,0 +1,5 @@
+HEX for box shadows
+
+purple - 130,80,250
+magenta - 255,0,255
+cyan - 0,200,255
