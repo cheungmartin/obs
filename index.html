@@ -205,6 +205,19 @@
 				z-index: 2;
 				overflow-y: scroll;
 			}
+			#screenShot_overlay{
+				position: fixed;
+				display: none;
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background-color: rgba(0,0,0,0.8);
+				z-index: 2;
+				//overflow-y: scroll;
+			}
 		</style>
 		<script type="text/javascript" src="obs-websocket.js"></script>
 	</head>
@@ -246,6 +259,7 @@
 				  </fieldset><br><br><br>
 				</form>
 			</div>
+			<div id="screenShot_overlay"></div>
 			<div class="pgm_pvw_bars" id="pgm_pvw_bars" style="display: inline-block;">
 				<div id="screenShot_PGM" class="screenShot_Win" style="border: 2px solid rgb(240,0,0);"></div>
 				<div id="screenShot_PVW" class="screenShot_Win" style="border: 2px solid rgb(0,240,0);"></div>

@@ -61,6 +61,8 @@ var ss_Pgm = $_GET('ssPgm');
 var ss_Pvw = $_GET('ssPvw');
 var ss_FPS = $_GET('ssFPS');
 var ss_size = $_GET('ssSize');
+var ss_size_overlay = window.innerwidth; 
+var pgmSSOverlay = false;
 var noSleep = new NoSleep();
 if (nosleepvar != null && nosleepvar == 'on') {
 	noSleep.enable();
@@ -167,7 +169,7 @@ obs.connect({
 	if(ss_Pgm == true){
 		document.getElementById("screenShot_PGM").style.display = "inline-block";
 		document.getElementById("screenShot_PGM").style.height = ss_size*9 + "px";
-		document.getElementById("screenShot_PGM").innerHTML = '<img id="pgmImg" alt="Program" src=""/>';
+		document.getElementById("screenShot_PGM").innerHTML = '<img id="pgmImg" alt="Program" src=""/ onclick="ssOverlaySet()">';
 	}
 	if(ss_Pvw == true || ss_Pgm == true){
 		document.getElementById("screenShot_PVW").insertAdjacentHTML('afterend', '<br>');
@@ -570,6 +572,9 @@ function connPage() {
 function exitOverlay() {
 	if (connected == true)
 		document.getElementById("connOverlay").style.display = "none";
+	if (pgmSSOverlay == true)
+		document.getElementById("screenShot_overlay").style.display = "none";
+	
 }
 
 // * * Rendering Pgm/Pvw Screenshot * * //
@@ -577,8 +582,29 @@ function preInter() {
 	if(ss_Pvw == true){
 		setInterval(ssPvw, 1000/ss_FPS);
 	}
-	if(ss_Pgm == true)
+	if(ss_Pgm == true){
+		if(pgmSSOverlay = true){
+			setInterval(ssOverlay, 1000/ss_FPS);
+		}
 		setInterval(ssPgm, 1000/ss_FPS);
+	}
+}
+function ssOverlaySet() {
+	//if(win = "pgm"){
+		tmp1 = activescene;	// TODO: scene
+		pgmSSOverlay = true;
+		document.getElementById("screenShot_overlay").style.display = "block";
+		document.getElementById("screenShot_overlay").innerHTML = '<img id="overlayImg" alt="Screen Overlay" src=""/ onclick="exitOverlay()">';
+	//}
+}
+function ssOverlay(win) {
+	obs.send('TakeSourceScreenshot',{
+		sourceName: activescene,	// TODO: scene
+		embedPictureFormat: "png",
+		width: ss_size_overlay, height: ss_size_overlay/16*9	//ss_size*4*16, height: ss_size*4*9
+	}).then(function(data) {
+		document.getElementById('overlayImg').src = data.img;
+	});
 }
 function ssPvw() {
 	obs.send('TakeSourceScreenshot',{
