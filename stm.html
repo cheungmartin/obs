@@ -64,6 +64,19 @@
 	var st_ip = $_GET('ip');
 	var st_port = $_GET('port');
 	var st_spd = $_GET('spdms');
+	// Default values
+	if(st_ip == null){
+		var st_ip = 192.168.1.17;
+	}
+	if(st_port == null){
+		var st_port = 7070;
+	}
+	if(st_spd == null){
+		var refreshInterval = 500;
+	}else{
+		var refreshInterval = st_spd;
+	}	
+	
 	var st_ipport = st_ip + ":" + st_port;
 </script>
 <body>
@@ -84,20 +97,13 @@
 			</form>
 			<button id="btnFullscreen" class="btn btn-lg btn-primary">Fullscreen</button>
 		</div>
-    </div> <!-- /container -->
+    </div>
 
     <script>
-        if(st_spd == null){
-			var refreshInterval = 500;
-		}else{
-			var refreshInterval = st_spd;
-		}
-
         var timer = setInterval(function () {
             var ImagePreview = document.getElementById('imgPrev');
             ImagePreview.src = "http://" + st_ipport + "/ScreenTask.jpg?rand=" + Math.random();
         }, refreshInterval);
-
 
 
         function requestFullScreen(element) {
@@ -120,9 +126,6 @@
             var viewer = document.getElementById('Viewer');
             requestFullScreen(viewer);
         };
-
-
-
     </script>
 
 </body>
