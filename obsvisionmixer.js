@@ -19,7 +19,6 @@ var swSceneName = "";
 var activetrans = "";
 var studio_status = "unknown";
 var cut_transition = "";
-var manual_preview = !0;
 var trans_duration = 350;
 var run_slider = !0;
 var isstreaming = !1;
@@ -54,9 +53,9 @@ var scene_counter_limit = $_GET('limit');
 var btn_margin = $_GET('margin');
 var nosleepvar = $_GET('nosleep');
 var numpad = $_GET('numpad');
-var disable_aux = $_GET('aux');
-var disable_src = $_GET('src');
-var disable_mute = $_GET('mute');
+var enable_aux = $_GET('aux');
+var enable_src = $_GET('src');
+var enable_mute = $_GET('mute');
 var ss_Pgm = $_GET('ssPgm');
 var ss_Pvw = $_GET('ssPvw');
 var ss_FPS = $_GET('ssFPS');
@@ -65,7 +64,7 @@ var noSleep = new NoSleep();
 if (nosleepvar != null && nosleepvar == 'on') {
 	noSleep.enable();
 	console.log("Nosleep enabled!");
-	document.getElementById("nosleep").checked = true;
+	document.getElementById("nosleep").checked = !0;
 }
 if (obs_ip == null) {
 	obs_ip = "localhost"
@@ -73,7 +72,7 @@ if (obs_ip == null) {
 	document.getElementById("ip").value = obs_ip;
 }
 if (obs_port == null) {
-	obs_port = "4444"
+	obs_port = "4455"
 }else{
 	document.getElementById("port").value = obs_port;
 }
@@ -91,32 +90,40 @@ if (btn_margin != null)
 if (btn_margin == null || isNaN(btn_margin))
 	btn_margin = 5;
 if (numpad != null)
-	document.getElementById("numpad").checked = true;
-if (disable_aux != null) {
-	disable_aux = true;
-	document.getElementById("aux").checked = true;
-}
-if (disable_src != null) {
-	disable_src = true;
-	document.getElementById("src").checked = true;
+	document.getElementById("numpad").checked = !0;
+if (enable_aux == null || enable_aux == !0) {
+	enable_aux = !0;
+	document.getElementById("aux").checked = !0;
 }else{
+	enable_aux = !1;
+	document.getElementById("aux").checked = !1;
+}
+if (enable_src == null || enable_src == !0) {
+	enable_src = !0;
+	document.getElementById("src").checked = !0;
 	document.getElementsByClassName("srcrow")[0].insertAdjacentHTML('beforebegin', '<br>');
-}
-if (disable_mute != null) {
-	disable_mute = true;
-	document.getElementById("mute").checked = true;
-}
-if (ss_Pgm != null) {
-	ss_Pgm = false;
-	document.getElementById("ssPgm").checked = true;
 }else{
-	ss_Pgm = true;
+	enable_src = !1;
+	document.getElementById("src").checked = !1;
 }
-if (ss_Pvw != null) {
-	ss_Pvw = false;
-	document.getElementById("ssPvw").checked = true;
+if (enable_mute == null | enable_mute == !0) {
+	enable_mute = !0;
+	document.getElementById("mute").checked = !0;
 }else{
-	ss_Pvw = true;
+	enable_mute = !1;
+	document.getElementById("mute").checked = !1;
+}
+if (ss_Pgm == null) {
+	ss_Pgm = !1;
+}else{
+	ss_Pgm = !0;
+	document.getElementById("ssPgm").checked = !0;
+}
+if (ss_Pvw == null) {
+	ss_Pvw = !1;
+}else{
+	ss_Pvw = !0;
+	document.getElementById("ssPvw").checked = !0;
 }
 if (ss_FPS == null) {
 	ss_FPS = "2"
@@ -133,145 +140,123 @@ document.getElementsByClassName("screenShot_Win")[1].style.height = ss_size*9 + 
 var obs_ip_port = obs_ip + ":" + obs_port;
 var obs = new OBSWebSocket();
 var connected = false;
-obs.connect({
-	address: obs_ip_port,
-	password: password
-}).then(() => {
+obs.connect(
+	'ws://'+obs_ip_port,
+	password
+).then(() => {
     console.log('Success! We\'re connected & authenticated.');
 	connected = true;
 	var obsversion = "";
 	var obswsversion = "";
-	obs.send('GetVersion').then(function(result) {
-		obsversion = result.obsStudioVersion;
-		obswsversion = result.obsWebsocketVersion;
+	obs.call('GetVersion').then(function(result) {
+		obsversion = result.obsVersion;
+		obswsversion = result.obsWebSocketVersion;
 		document.getElementById("connectedto").innerHTML = "Connected to: " + obs_ip_port + " | OBS v" + obsversion + " obs-websocket v" + obswsversion + " | ";
     });
     document.getElementById("connOverlay").style.display = "none";
 	document.getElementsByClassName("alerte")[0].style.display = "none";	//still need if user never connect successfully
     document.getElementsByClassName("alerte")[1].style.display = "none";
-	/*if(disable_aux == true)
+	/*if(enable_aux != true)
 		document.getElementsByClassName("auxrow")[0].style.display = "none";*/
-	if(disable_src == true){
+	if(enable_src == !1){
 		document.getElementsByClassName("srcrow")[0].style.display = "none";
 		document.getElementsByClassName("srcrow")[1].style.display = "none";
 	}
-	if(disable_mute == true){
-		document.getElementById("lesboutons_AUDIO_id").style.display = "none";
-		document.getElementById("lesboutons_AUDIO").style.display = "none";
+	if(enable_mute == !1){
+		document.getElementById("lesbuttons_AUDIO_id").style.display = "none";
+		document.getElementById("lesbuttons_AUDIO").style.display = "none";
 	}
-	if(ss_Pvw == true){
-		document.getElementById("screenShot_PVW").style.display = "inline-block";
-		document.getElementById("screenShot_PVW").style.height = ss_size*9 + "px";
-		document.getElementById("screenShot_PVW").innerHTML = '<img id="pvwImg" alt="Preview" src=""/>';
-	}
-	if(ss_Pgm == true){
-		document.getElementById("screenShot_PGM").style.display = "inline-block";
-		document.getElementById("screenShot_PGM").style.height = ss_size*9 + "px";
-		document.getElementById("screenShot_PGM").innerHTML = '<img id="pgmImg" alt="Program" src=""/>';
-	}
-	if(ss_Pvw == true || ss_Pgm == true){
+	if(ss_Pvw == !0 || ss_Pgm == !0){
+		if(ss_Pvw == !0)
+			initSsWindow("screenShot_PVW", "pvwImg", "Preview");
+		if(ss_Pgm == !0)
+			initSsWindow("screenShot_PGM", "pgmImg", "Program");
 		document.getElementById("screenShot_PVW").insertAdjacentHTML('afterend', '<br>');
 	}
-    return obs.send('GetSceneList');
-}).then(data => {
+	function initSsWindow(ssId, imgId, imgAlt){
+		document.getElementById(ssId).style.display = "inline-block";
+		document.getElementById(ssId).style.height = ss_size*9 + "px";
+		document.getElementById(ssId).innerHTML = '<img id="' + imgId + '" alt="' + imgAlt + '" src=""/>';
+	}
+    return obs.call('GetSceneList');
+}).then(data => {	// Initial print
     var scene_counter = 0;
 	var aux_counter = 0;
 	var aux2_counter = 0;
-	isthereaux = false;
-	isthereaux2 = false;
+	isthereaux = !1;
+	isthereaux2 = !1;
     data.scenes.forEach(scene => {
-        if (scene.name !== data.currentScene) {}
         if (scene_counter < scene_counter_limit) {
-            document.getElementById("lesboutons_PGM").innerHTML += "<input class='boutonscene classicbutton boutonscenepgm' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='pgm_" + scene.name + "' onclick='switch_pgm(this);' type='submit' name='" + scene.name + "' value='" + scene.name + "'/>";
-            document.getElementById("lesboutons_PVW").innerHTML += "<input class='boutonscene classicbutton boutonscenepvw' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='pvw_" + scene.name + "' onclick='switch_pvw(this);' type='submit' name='" + scene.name + "' value='" + scene.name + "'/>";
-            scenes_avec_id.push(scene.name)
+            document.getElementById("lesbuttons_PGM").innerHTML += "<input class='buttonscene classicbutton buttonscenepgm' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='pgm_" + scene.sceneName + "' onclick='switch_pgm(this);' type='submit' name='" + scene.sceneName + "' value='" + scene.sceneName + "'/>";
+            document.getElementById("lesbuttons_PVW").innerHTML += "<input class='buttonscene classicbutton buttonscenepvw' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='pvw_" + scene.sceneName + "' onclick='switch_pvw(this);' type='submit' name='" + scene.sceneName + "' value='" + scene.sceneName + "'/>";
+            scenes_avec_id.push(scene.sceneName)
         }
 		//AUX using same limit
-		if(scene.name == 'AUX'){
-			isthereaux = true;
-			scene.sources.forEach(source => {
-				if (aux_counter < scene_counter_limit) {
-					document.getElementById("lesboutons_AUX").innerHTML += "<input class='boutonscene classicbutton boutonsceneaux' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='aux_" + source.name + "' onclick='switch_aux(this);' type='submit' name='" + source.name + "' value='" + source.name + "'/>";
-					if(source.render == true){
-						colorAUX(document.getElementById("aux_" + source.name), true);
-					}
-					aux_counter++;
-				}
-			})
+		if(scene.sceneName == 'AUX'){
+			isthereaux = !0;
+			drawAuxBtn(scene.sceneName, 'aux', 'AUX', aux_counter);
 		}
-		if(scene.name == 'AUX 2'){
-			isthereaux2 = true;
-			scene.sources.forEach(source => {
-				if (aux2_counter < scene_counter_limit) {
-					document.getElementById("lesboutons_AUX2").innerHTML += "<input class='boutonscene classicbutton boutonsceneaux2' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='aux2_" + source.name + "' onclick='switch_aux(this);' type='submit' name='" + source.name + "' value='" + source.name + "'/>";
-					if(source.render == true){
-						colorAUX(document.getElementById("aux2_" + source.name), true);
-					}
-					aux2_counter++;
-				}
-			})
+		if(scene.sceneName == 'AUX 2'){
+			isthereaux2 = !0;
+			drawAuxBtn(scene.sceneName, 'aux2', 'AUX2', aux2_counter);
 		}
-        activescene = data.currentScene;
         scene_counter++;
-		if (scene.name == data.currentScene)	//In Assume no preview scene, draw the button first
-			drawSourceBtn(scene);
     });
-	if(disable_aux != true){
-		if (isthereaux == true){
+	if(enable_aux == !0){
+		if (isthereaux == !0){
 			document.getElementsByClassName("auxrow")[0].style.display = "inline-block";
 			document.getElementsByClassName("auxrow")[1].style.display = "inline-block";
-			document.getElementById("lesboutons_AUX").insertAdjacentHTML('afterend', '<br>');
+			document.getElementById("lesbuttons_AUX").insertAdjacentHTML('afterend', '<br>');
 		}
-		if (isthereaux2 == true){
+		if (isthereaux2 == !0){
 			document.getElementsByClassName("aux2row")[0].style.display = "inline-block";
 			document.getElementsByClassName("aux2row")[1].style.display = "inline-block";
-			document.getElementById("lesboutons_AUX2").insertAdjacentHTML('afterend', '<br>');
+			document.getElementById("lesbuttons_AUX2").insertAdjacentHTML('afterend', '<br>');
 		}
 	}
+	activescene = data.currentProgramSceneName;
     if (scenes_avec_id.includes(activescene))
-        colorPGM(document.getElementById("pgm_" + activescene));
-    obs.send('GetPreviewScene').then(function(result) {
-        activepreview = result.name;
-        if (scenes_avec_id.includes(activepreview)) {
-            colorPVW(document.getElementById("pvw_" + activepreview))
-        }
-		drawSourceBtn(result);
-    });
-    obs.send('GetTransitionList').then(function(result) {
+        colorPGM(document.getElementById("pgm_" + activescene))
+	activepreview = data.currentPreviewSceneName;
+	if (scenes_avec_id.includes(activepreview))
+		colorPVW(document.getElementById("pvw_" + activepreview))
+	
+	drawSourceBtn(data.currentPreviewSceneName);
+    
+	obs.call('GetSceneTransitionList').then(function(result) {
         var transitions_liste = result.transitions;
-        cut_transition = transitions_liste[0].name;
+        cut_transition = transitions_liste[0].transitionName;
         transitions_liste.forEach(trans => {
-            var transname_quotes = '"' + trans.name + '"';
-            document.getElementById("lesboutons_TRANS").innerHTML += "<input class='boutonscene classicbutton boutontrans' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='trans_" + trans.name + "' onclick='cut(" + transname_quotes + ");' type='submit' name='" + trans.name + "' value='" + trans.name + "'/>"
+            var transname_quotes = '"' + trans.transitionName + '"';
+            document.getElementById("lesbuttons_TRANS").innerHTML += "<input class='buttonscene classicbutton buttontrans' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='trans_" + trans.transitionName + "' onclick='transit(" + transname_quotes + ");' type='submit' name='" + trans.transitionName + "' value='" + trans.transitionName + "'/>"
         });
-        var currenttransition = result.currentTransition;
+        var currenttransition = result.currentSceneTransitionName;
         activetrans = "trans_" + currenttransition;
         colorTRANS(document.getElementById(activetrans))
     });
-    obs.send('GetTransitionDuration').then(function(result) {
-        trans_duration = result.transitionDuration;
-        document.getElementById('transition_input').value = trans_duration
-    });
-    obs.send('GetStudioModeStatus').then(function(result) {
-        if (result.studioMode == !0) {
+	
+    getCurrentTransition();
+	
+    obs.call('GetStudioModeEnabled').then(function(result) {
+        if (result.studioModeEnabled == !0) {
             enablestudiomode()
         } else {
             disablestudiomode()
         }
     });
 	
-    obs.send('GetSpecialSources').then(function(result) {		//AUDIO Source here
-        console.log("Audio Sources :");
-		console.log(Object.entries(result));
+    obs.call('GetSpecialInputs').then(function(result) {		//AUDIO Source here
+        //console.log("Audio Sources :");
+		//console.log(Object.entries(result));
 		Object.entries(result).forEach(function(element){
 			//console.log(element[0]);
-			if(['desktop-1', 'desktop-2', 'mic-1', 'mic-2', 'mic-3'].indexOf(element[0]) >= 0){
-				desktop1 = element[1];
-				document.getElementById("lesboutons_AUDIO").innerHTML += "<div style='display:inline-block; width:100px; text-align:center; margin:" + btn_margin + "px " + btn_margin + "px;'><div class='audioChannel'>" + desktop1 + "</div><input class='boutonscene classicbutton boutonsceneaudio' id='audio_" + desktop1 + "' onclick='switch_audio(this);' type='submit' name='" + desktop1 + "' value='MUTE'/>" + "</div>";
-				obs.send('GetMute', {
-					"source": desktop1
+			if(element[1] != null){
+				var asrcName = element[1];
+				document.getElementById("lesbuttons_AUDIO").innerHTML += "<div style='display:inline-block; width:100px; text-align:center; margin:" + btn_margin + "px " + btn_margin + "px;'><div class='audioChannel'>" + asrcName + "</div><input class='buttonscene classicbutton buttonsceneaudio' id='audio_" + asrcName + "' onclick='switch_audio(this);' type='submit' name='" + asrcName + "' value='MUTE'/>" + "</div>";
+				obs.call('GetInputMute', {
+					"inputName": asrcName
 				}).then(function(result){	//Initalize mute button status
-					colorMUTE(document.getElementById("audio_" + result.name), result.muted);
+					colorMUTE(document.getElementById("audio_" + asrcName), result.inputMuted);
 				});
 			}
 		});
@@ -280,68 +265,65 @@ obs.connect({
     console.log(err)
 });
 
-obs.on('SwitchScenes', data => {
+// * * Event Listeners * * //
+obs.on('CurrentProgramSceneChanged', data => {
     colorPGM(document.getElementById("pgm_" + data.sceneName));
     activescene = data.sceneName;
 	if(studio_status == "disabled")
-		drawSourceBtn(data);
+		drawSourceBtn(activescene);
 });
-obs.on('PreviewSceneChanged', data => {
+obs.on('CurrentPreviewSceneChanged', data => {
 	colorPVW(document.getElementById("pvw_" + data.sceneName));
 	activepreview = data.sceneName;
-	drawSourceBtn(data);
+	drawSourceBtn(activepreview);
 });
 
-obs.on('SwitchTransition', data => {
-    colorTRANS(document.getElementById("trans_" + data.transitionName))
+obs.on('CurrentSceneTransitionChanged', data => {
+    colorTRANS(document.getElementById("trans_" + data.transitionName));
+	if (data.transitionName == cut_transition) {
+		;
+	}else{
+		getCurrentTransition();
+	}
 });
 
-//new version
-obs.on('SceneItemVisibilityChanged', data => {
+obs.on('SceneItemEnableStateChanged', data => {
 	// sources on/off in preview
 	if(data.sceneName == activepreview || (data.sceneName == activescene && studio_status == "disabled"))
-		colorSRC(document.getElementById("src_" + data.itemName), data.itemVisible);
+		colorSRC(document.getElementById("src_" + data.sceneItemId), data.sceneItemEnabled);
 	// sources on/off in AUX
 	if(data.sceneName == 'AUX')
-		colorAUX(document.getElementById("aux_" + data.itemName), data.itemVisible);
+		colorAUX(document.getElementById("aux_" + data.sceneItemId), data.sceneItemEnabled);
 	if(data.sceneName == 'AUX 2')
-		colorAUX(document.getElementById("aux2_" + data.itemName), data.itemVisible);
+		colorAUX(document.getElementById("aux2_" + data.sceneItemId), data.sceneItemEnabled);
 });
 
-obs.on('SourceMuteStateChanged', data => {
-	colorMUTE(document.getElementById("audio_" + data.sourceName), data.muted);
+obs.on('InputMuteStateChanged', data => {
+	colorMUTE(document.getElementById("audio_" + data.inputName), data.inputMuted);
 });
-
-obs.on('TransitionDurationChanged', data => {
-    trans_duration = data.newDuration;
+obs.on('CurrentSceneTransitionDurationChanged', data => {
+    trans_duration = data.transitionDuration;
     document.getElementById('transition_input').value = trans_duration
 });
-obs.on('StudioModeSwitched', data => {
-	if(data.newState == !0)
+obs.on('StudioModeStateChanged', data => {
+	if(data.studioModeEnabled == !0)
 		enablestudiomode();
 	else
 		disablestudiomode();
 });
+/*
 obs.on('Exiting', data => {
 	alert("OBS exited")
-});
-obs.on('SceneCollectionChanged', data => {
+});*/
+obs.on('CurrentSceneCollectionChanged', data => {
 	window.location.reload()
 });
-obs.on('StreamStarted', data => {
-	isstreaming = !0;
+obs.on('StreamStateChanged', data => {
+	isstreaming = data.outputActive;
 	showstreamstatus()
 });
-obs.on('StreamStopped', data => {
-	isstreaming = !1;
-	showstreamstatus()
-});
-obs.on('RecordingStarted', data => {
-	isrecording = !0;
-	showstreamstatus()
-});
-obs.on('RecordingStopped', data => {
-	isrecording = !1;
+obs.on('RecordStateChanged', data => {
+	isrecording = data.outputActive;
 	showstreamstatus()
 });
 obs.on('error', err => {
@@ -354,9 +336,9 @@ function disablestudiomode() {
 	document.getElementsByClassName("pvwrow")[1].style.display = "none";
 	document.getElementById("screenShot_PVW").style.display = "none";
     document.getElementById("studio_status").innerHTML = "Studio mode: " + studio_status + " | ";
-	obs.send('GetCurrentScene').then(function(result) {
-		activescene = result.name;
-		drawSourceBtn(result);
+	obs.call('GetCurrentProgramScene').then(function(result) {
+		activescene = result.currentProgramSceneName;
+		drawSourceBtn(activescene);
     });
 }
 
@@ -365,105 +347,111 @@ function enablestudiomode() {
     document.getElementsByClassName("pvwrow")[0].style.display = "inline-block";
 	document.getElementsByClassName("pvwrow")[1].style.display = "inline-block";
     document.getElementById("studio_status").innerHTML = "Studio mode: " + studio_status + " | ";
-	obs.send('GetPreviewScene').then(function(result) {
-        activepreview = result.name;
+	obs.call('GetCurrentPreviewScene').then(function(result) {
+        activepreview = result.currentPreviewSceneName	;
         if (scenes_avec_id.includes(activepreview)) {
             colorPVW(document.getElementById("pvw_" + activepreview))
         }
     });
-	if(ss_Pvw == true)
+	if(ss_Pvw == !0)
 		document.getElementById("screenShot_PVW").style.display = "inline-block";
+}
+
+function showstreamstatus() {
+	if (isstreaming && isrecording) {
+		document.getElementById("strRec").innerHTML = "(<img src='images/live.gif'/> Streaming and recording)"
+	} else if (isstreaming && !isrecording) {
+		document.getElementById("strRec").innerHTML = "(<img src='images/live.gif'/> Streaming)"
+	} else if (!isstreaming && isrecording) {
+		document.getElementById("strRec").innerHTML = "(<img src='images/live.gif'/> Recording)"
+	} else {
+		document.getElementById("strRec").innerHTML = ""
+	}
 }
 
 // NumberPad 1,2,3,4 to cut-in program view (1 corr key 97)
 window.onkeyup = function(e) {
 	var key = e.keyCode ? e.keyCode : e.which;
 	if (numpad != null && key > 96 && key < 101)
-		switch_pgm(document.getElementsByClassName("boutonscenepgm")[key-97]);
+		switch_pgm(document.getElementsByClassName("buttonscenepgm")[key-97]);
 }
 
-function switch_aux(nomdescene) {
-	if(nomdescene.classList.contains('boutonsceneaux'))
+
+// * * User Action * * //
+function switch_aux(nomdescene, sceneItemId) {
+	if(nomdescene.classList.contains('buttonsceneaux'))
 		swSceneName = 'AUX';
 	else
 		swSceneName = 'AUX 2';
 	
 	if(nomdescene.classList.contains('colorAUXbutton')){
-		obs.send('SetSceneItemRender', {'scene-name': swSceneName, 'source': nomdescene.value, 'render': false});
+		obs.call('SetSceneItemEnabled', {'sceneName': swSceneName, 'sceneItemId': sceneItemId, 'sceneItemEnabled': false});
 	}else{
-		obs.send('SetSceneItemRender', {'scene-name': swSceneName, 'source': nomdescene.value, 'render': true});
+		obs.call('SetSceneItemEnabled', {'sceneName': swSceneName, 'sceneItemId': sceneItemId, 'sceneItemEnabled': true});
 	}
 }
 
 function switch_pgm(nomdescene) {
 	if (studio_status == "enabled")
-		obs.send('SetCurrentTransition', {"transition-name": cut_transition});
+		obs.call('SetCurrentSceneTransition', {"transitionName": cut_transition});
 	else
 		myMove();
-	obs.send('SetCurrentScene', {'scene-name': nomdescene.value});
+	obs.call('SetCurrentProgramScene', {'sceneName': nomdescene.value});
 }
 
 function switch_pvw(nomdescene) {
-	obs.send('SetPreviewScene', {'scene-name': nomdescene.value});
+	obs.call('SetCurrentPreviewScene', {'sceneName': nomdescene.value});
 }
 
-function switch_src(nomdescene) {
+function switch_src(nomdescene, sceneItemId) {
 	if(studio_status == "disabled")
 		swSceneName = activescene;
 	else
 		swSceneName = activepreview;
 	if(nomdescene.classList.contains('colorSRCbutton'))
-		obs.send('SetSceneItemRender', {'scene-name': swSceneName, 'source': nomdescene.value, 'render': false});
+		obs.call('SetSceneItemEnabled', {'sceneName': swSceneName, 'sceneItemId': sceneItemId, 'sceneItemEnabled': false});
 	else
-		obs.send('SetSceneItemRender', {'scene-name': swSceneName, 'source': nomdescene.value, 'render': true});
+		obs.call('SetSceneItemEnabled', {'sceneName': swSceneName, 'sceneItemId': sceneItemId, 'sceneItemEnabled': true});
 }
 
 function switch_audio(nomdescene) {
 	if(nomdescene.classList.contains('colorMUTEbutton')){
-		obs.send('SetMute', {'source': nomdescene.name, 'mute': false});
+		obs.call('SetInputMute', {'inputName': nomdescene.name, 'inputMuted': false});
 	}else{
-		obs.send('SetMute', {'source': nomdescene.name, 'mute': true});
+		obs.call('SetInputMute', {'inputName': nomdescene.name, 'inputMuted': true});
 	}
 }
 
-function cut(trans_type) {
-    manual_preview = !1;
-    var transition = {
-        "with-transition": {
-            "name": trans_type,
-            "duration": trans_duration
-        }
-    };
+function transit(trans_name) {
     activepreview = activescene;
     if (studio_status == "enabled") {
-        obs.send('TransitionToProgram', transition).then(function(data) {
-			if (trans_type == cut_transition) {
-            obs.send('SetPreviewScene', {
-                'scene-name': activepreview
-            });
-            run_slider = !1;
-            manual_preview = !0
-			} else {
-				setTimeout(function() {
-					obs.send('SetPreviewScene', {
-						'scene-name': activepreview
+		obs.call('SetCurrentSceneTransition', {"transitionName": trans_name}).then(() => {
+			obs.call('TriggerStudioModeTransition').then(function(data) {
+				if (trans_name == cut_transition) {
+					obs.call('SetCurrentPreviewScene', {
+						'sceneName': activepreview
 					});
-					manual_preview = !0
-				}, trans_duration)
-			}
+					run_slider = !1;
+				} else {
+					run_slider = !0;
+					/*setTimeout(function() {
+						obs.call('SetCurrentPreviewScene', {
+							'sceneName': activepreview
+						});
+					}, trans_duration)*/
+				}
+				myMove()
+			});
 		});
-        run_slider = !0;
-        
-        myMove()
     } else {
-        obs.send('SetCurrentTransition', {
-            "transition-name": trans_type
+        obs.call('SetCurrentSceneTransition', {
+            "transitionName": trans_name
         })
     }
 }
 
 function myMove() {
-    var elem = document.getElementById("trans_animation_child");
+	var elem = document.getElementById("trans_animation_child");
     var width = 0;
     var debut = new Date().getTime();
     if (run_slider) {
@@ -484,23 +472,48 @@ function myMove() {
 }
 document.getElementById("transition_input").onchange = function() {
     var trans_duration_input = parseInt(document.getElementById("transition_input").value);
-    obs.send('SetTransitionDuration', {
-        "duration": trans_duration_input
+    obs.call('SetCurrentSceneTransitionDuration', {
+        "transitionDuration": trans_duration_input
     })
 };
+function getCurrentTransition(){
+	obs.call('GetCurrentSceneTransition').then(function(result) {
+        trans_duration = result.transitionDuration;
+        document.getElementById('transition_input').value = trans_duration
+    });
+}
 
-function drawSourceBtn(data){
-	document.getElementById("lesboutons_SRC").innerHTML = "";
-	data.sources.forEach(source => {
-		document.getElementById("lesboutons_SRC").innerHTML += "<input class='boutonscene classicbutton boutonscenesrc' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='src_" + source.name + "' onclick='switch_src(this);' type='submit' name='" + source.name + "' value='" + source.name + "'/>";
-		if(source.render == true){
-			colorSRC(document.getElementById("src_" + source.name), true);
-		}
-	})
+
+// * * User Interface * * //
+// Draw Source / AUX button
+function drawSourceBtn(sceneName){
+	document.getElementById("lesbuttons_SRC").innerHTML = "";
+	obs.call('GetSceneItemList', {sceneName: sceneName}).then(data => {
+		data.sceneItems.forEach(source => {
+		document.getElementById("lesbuttons_SRC").innerHTML += "<input class='buttonscene classicbutton buttonscenesrc' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='src_" + source.sceneItemId + "' onclick='switch_src(this," + source.sceneItemId + ");' type='submit' name='" + source.sourceName + "' value='" + source.sourceName + "'/>";
+			if(source.sceneItemEnabled == true){
+				colorSRC(document.getElementById("src_" + source.sceneItemId), true);
+			}
+		})
+	});
+}
+
+function drawAuxBtn(sceneName, prefix1, prefix2, counter){
+	obs.call('GetSceneItemList', {sceneName: sceneName}).then(data => {
+		data.sceneItems.forEach(source => {
+			if (counter < scene_counter_limit) {
+				document.getElementById("lesbuttons_" + prefix2).innerHTML += "<input class='buttonscene classicbutton buttonscene" + prefix1 + "' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='" + prefix1 + "_" + source.sceneItemId + "' onclick='switch_aux(this," + source.sceneItemId + ");' type='submit' name='" + source.sourceName + "' value='" + source.sourceName + "'/>";
+				if(source.sceneItemEnabled == true){
+					colorAUX(document.getElementById(prefix1 + "_" + source.sceneItemId), true);
+				}
+				counter++;
+			}
+		})
+	});
 }
 
 function colorAUX(elem, oo) {
-	if(oo == true){
+	if(oo == !0){
 		elem.classList.remove("classicbutton");
 		elem.classList.add("colorAUXbutton")
 	}else{
@@ -509,23 +522,23 @@ function colorAUX(elem, oo) {
 	}
 }
 function colorPGM(elem) {
-	var boutonsscenepgm = document.getElementsByClassName("boutonscenepgm");
-	for (var i = 0; i < boutonsscenepgm.length; i++) {
-		boutonsscenepgm[i].classList.add("classicbutton")
+	var buttonsscenepgm = document.getElementsByClassName("buttonscenepgm");
+	for (var i = 0; i < buttonsscenepgm.length; i++) {
+		buttonsscenepgm[i].classList.add("classicbutton")
 	}
 	elem.classList.remove("classicbutton");
 	elem.classList.add("colorPGMbutton")
 }
 function colorPVW(elem) {
-	var boutonsscenepvw = document.getElementsByClassName("boutonscenepvw");
-	for (var i = 0; i < boutonsscenepvw.length; i++) {
-		boutonsscenepvw[i].classList.add("classicbutton")
+	var buttonsscenepvw = document.getElementsByClassName("buttonscenepvw");
+	for (var i = 0; i < buttonsscenepvw.length; i++) {
+		buttonsscenepvw[i].classList.add("classicbutton")
 	}
 	elem.classList.remove("classicbutton");
 	elem.classList.add("colorPVWbutton");
 }
 function colorSRC(elem, oo) {
-	if(oo == true){
+	if(oo == !0){
 		elem.classList.remove("classicbutton");
 		elem.classList.add("colorSRCbutton")
 	}else{
@@ -534,15 +547,15 @@ function colorSRC(elem, oo) {
 	}
 }
 function colorTRANS(elem) {
-	var boutonsscenetrans = document.getElementsByClassName("boutontrans");
-	for (var i = 0; i < boutonsscenetrans.length; i++) {
-		boutonsscenetrans[i].classList.add("classicbutton")
+	var buttonsscenetrans = document.getElementsByClassName("buttontrans");
+	for (var i = 0; i < buttonsscenetrans.length; i++) {
+		buttonsscenetrans[i].classList.add("classicbutton")
 	}
 	elem.classList.remove("classicbutton");
 	elem.classList.add("colorTRANSbutton")
 }
 function colorMUTE(elem, oo) {
-	if(oo == true){
+	if(oo == !0){
 		elem.classList.remove("classicbutton");
 		elem.classList.add("colorMUTEbutton")
 	}else{
@@ -551,53 +564,36 @@ function colorMUTE(elem, oo) {
 	}
 }
 
-function showstreamstatus() {
-	if (isstreaming && isrecording) {
-		document.getElementById("strRec").innerHTML = "(<img src='images/live.gif'/> Streaming and recording)"
-	} else if (isstreaming && !isrecording) {
-		document.getElementById("strRec").innerHTML = "(<img src='images/live.gif'/> Streaming)"
-	} else if (!isstreaming && isrecording) {
-		document.getElementById("strRec").innerHTML = "(<img src='images/live.gif'/> Recording)"
-	} else {
-		document.getElementById("strRec").innerHTML = ""
-	}
-}
 
 // * * Call Connect page Overlay * * //
 function connPage() {
 	document.getElementById("connOverlay").style.display = "block";
 }
 function exitOverlay() {
-	if (connected == true)
+	if (connected == !0)
 		document.getElementById("connOverlay").style.display = "none";
 }
 
-// * * Rendering Pgm/Pvw Screenshot * * //
+
+// * * Render Pgm/Pvw Screenshot * * //
 function preInter() {
-	if(ss_Pvw == true){
-		setInterval(ssPvw, 1000/ss_FPS);
+	if(ss_Pvw == !0){
+		setInterval(function(){ ssView(activepreview,'pvwImg'); }, 1000/ss_FPS);
 	}
-	if(ss_Pgm == true)
-		setInterval(ssPgm, 1000/ss_FPS);
+	if(ss_Pgm == !0)
+		setInterval(function(){ ssView(activescene,'pgmImg'); }, 1000/ss_FPS);
 }
-function ssPvw() {
-	obs.send('TakeSourceScreenshot',{
-		sourceName: activepreview,
-		embedPictureFormat: "png",
-		width: ss_size*16, height: ss_size*9
+function ssView(srcName,eleId) {
+	obs.call('GetSourceScreenshot',{
+		sourceName: srcName,
+		imageFormat: "png",
+		imageWidth: ss_size*16, imageHeight: ss_size*9,
+		imageCompressionQuality: 50
 	}).then(function(data) {
-		document.getElementById('pvwImg').src = data.img;
+		document.getElementById(eleId).src = data.imageData;
 	});
 }
-function ssPgm() {
-	obs.send('TakeSourceScreenshot',{
-		sourceName: activescene,
-		embedPictureFormat: "png",
-		width: ss_size*16, height: ss_size*9
-	}).then(function(data) {
-		document.getElementById('pgmImg').src = data.img;
-	});
-}
+
 
 // * * Coloring button * * //
 var btncolorlist = [

@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<!-- V3.1.0 and modified by Martin -->
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="shrink-to-fit=no">
+		<title>OBS Studio Audio mixer</title>
+		<link rel="shortcut icon" type="image/png" href="images/favicon-32x32.png"/>
+		<style>
+			html {
+			  touch-action: manipulation;
+			}
+			.info{
+				color: rgb(200,200,200);
+				font-size: 0.7rem;
+				width:100%;
+				display:inline-block;
+			}
+			.boutonscene{
+				display: inline-block;
+				width: 100px;
+				height: 100px;
+				background: transparent;
+				background-image: url(images/blank_button.png);
+				border-radius: 8px;
+				border: none;
+				text-align: center;
+				font-weight: bold;
+				padding: 0px 12px;
+				white-space: normal;
+				vertical-align: middle;
+				outline:none;
+				-webkit-tap-highlight-color: transparent;
+				cursor: pointer;
+				font-size: 1rem;
+			}
+			.boutonscene:focus{
+				outline: none;
+				-webkit-tap-highlight-color: transparent;
+			}
+			.redbutton{
+				background-image: url(images/blank_red_button.png);
+				box-shadow: 0px 0px 30px rgb(255,0,0);
+				background-size: 100px 100px;
+			}
+			.classicbutton{
+				background-color:  rgb(34,34,34);
+				background-image: url(images/blank_button.png);
+				background-size: 100px 100px;
+				box-shadow:none;
+			}
+			html, body{
+				background-color: rgb(45,45,45);
+				font-family: Helvetica, Arial, Sans-Serif;
+			}
+			.lesboutons_AUDIO{
+				background-color: rgb(34,34,34);
+				padding: 1rem;
+				display: inline-block;
+				border: 3px solid rgb(25,25,25);
+				border-radius: 10px;
+				width: 100px;
+				height: 450px;
+				text-align: center;
+				vertical-align: top;
+			}
+			h1{
+				color: rgb(105,105,105);
+				font-weight: normal;
+				margin: 5px 0;
+				font-size: 1.7rem;
+			}
+			.audioChannel{
+				height: 40px;
+				text-align: center;
+				margin: 0 0 10px 0;
+				white-space: normal;
+				outline:none;
+				-webkit-tap-highlight-color: transparent;
+				color: rgb(200,200,200);
+				font-weight: bold;
+			}
+			#audioFrame{
+				white-space: nowrap;
+			}
+			.alerte{
+				color: rgb(200,0,0);
+			}
+			h3.alerte{
+				font-weight : normal;
+			}
+			#connect_form{
+				color: white;
+			}
+			#connect_form label{
+				display:inline-block;
+				width: 150px;
+			}
+			#connect_form input{
+				padding: 10px;
+				font-weight: bold;
+			}
+			
+			input[type=range] {
+				-webkit-appearance: none;
+				width: 240px;
+				transform: rotate(270deg) translate(-135px,-71px);
+			}
+			input[type=range]::-webkit-slider-runnable-track {
+				height: 5px;
+				background: #ccc;
+				border: none;
+				border-radius: 3px;
+			}
+			input[type=range]::-webkit-slider-thumb {
+				-webkit-appearance: none;
+				border: none;
+				height: 40px;
+				width: 75px;
+				background-image: url(images/fader.jpg);
+				background-size: 75px 40px;
+				margin-top: -18px;
+			}
+			input[type=range]::-moz-range-thumb {
+				-webkit-appearance: none;
+				border: none;
+				height: 40px;
+				width: 75px;
+				background-image: url(images/fader.jpg);
+				background-size: 75px 40px;
+				margin-top: -18px;
+			}
+			input[type=range]:focus {
+				outline: none;
+			}
+			input[type=range]:focus::-webkit-slider-runnable-track {
+				background: #ddd;
+			}
+
+			.fader_value{
+				font-weight: bold;
+				margin: 5px 0;
+				color: #fff;
+				display: inline-block;
+				width: 70px;
+				text-align: right;
+				overflow: hidden;
+			}
+			.fader{
+				height:280px;
+			}
+		</style>
+		<script type="text/javascript" src="obs-ws.js"></script>
+	</head>
+	<body>
+		<div>
+			<h2 class="alerte">Error : not connected to OBS<br/><h3 class="alerte">Please make sure OBS is on, with the plugin "obs-websocket" installed.</h3>
+			<form class="alerte" id="connect_form" action="">
+			  <fieldset>
+				<legend>Connection:</legend>
+				<label for="ip">IP address :</label>
+				<input type="text" name="ip" value="" placeholder="Ex: 192.168.1.17"><br><br>
+				<label for="port">Port :</label>
+				<input type="text" name="port" value="" placeholder="Ex: 4444"><br><br>
+				<label for="password">Password :</label>
+				<input type="text" name="password" value="" placeholder="Ex: myp@pssw0rd"> (if authentication is enabled)<br><br>
+				<label for="margin">Margin between buttons ?</label>
+				<input type="number" name="margin" value="5" min="0" max="9999"> (5 by default)<br><br>
+				<br>
+				<input style="padding: 10px;" type="submit" value="Connect to OBS">
+			  </fieldset>
+			</form>
+			</h2>
+			<h1>Audio</h1>
+			<div id="audioFrame">
+			</div>
+		</div>
+		<input onclick="fullscreen(this);" style="height: 50px;clear:both; margin: 5px 0 0 1rem; border-radius: 10px; background-color: rgb(45,45,45); color: rgb(200,200,200);" type='submit' name='fullscreen' value='fullscreen'/>
+		<button onclick="window.history.go(-1); return false;" style="height: 50px;width: 80px;clear:both; margin: 5px 0 0 1rem; border-radius: 10px; background-color: rgb(45,45,45); color: rgb(200,200,200);" >Back</button>
+		<p class="info"><span id="connectedto"></span>Audio Mixer for OBS Sudio</p>
+		<script type="text/javascript" src="obsaudiomixer.js"></script>
+	</body>
+</html>
