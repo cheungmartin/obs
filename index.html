@@ -7,6 +7,11 @@
 		<title>OBS Studio Vision mixer</title>
 		<link rel="shortcut icon" type="image/png" href="images/favicon-32x32.png"/>
 		<style>
+			:root {
+				--widthTitleLeft: 50px;
+				--widthTran1: 200px;
+				--widthTran2: 240px;
+			}
 			html {
 			  touch-action: manipulation;
 			}
@@ -88,7 +93,7 @@
 				border-radius: 10px;
 			}
 			#lesbuttons_TRANS, #lesbuttons_AUDIO{
-				width: 240px;
+				width: var(--widthTran2);
 				text-align: center;
 			}
 			.screenShot_Win {
@@ -97,17 +102,17 @@
 				background-color: black;
 			}
 			.pgm_pvw_bars{
-				width: calc(100% - 250px);
+				width: calc(100% - var(--widthTran2) - 10px);
 			}
-			#lesbuttons_SRC, #lesbuttons_PVW, #lesbuttons_PGM{
-				max-width: calc(100% - 50px);
+			lesbuttons_AUX, #lesbuttons_AUX2, #lesbuttons_PGM, #lesbuttons_PVW, #lesbuttons_SRC{
+				max-width: calc(100% - var(--widthTitleLeft));
 			}
 			@media screen and (max-width: 900px) {
 				#lesbuttons_TRANS, #lesbuttons_AUDIO{
-					width: 150px;
+					width: var(--widthTran1);
 				}
 				.pgm_pvw_bars{
-					width: calc(100% - 210px);
+					width: calc(100% - var(--widthTran1) - 10px);
 				}
 			}
 			@media screen and (max-width: 790px) {
@@ -126,9 +131,9 @@
 			}
 			.titlerotate{
 				transform: rotate(-90deg);
-				display:inline-block;
-				width:30px;
-				height:50px;
+				display: inline-block;
+				width: 30px;
+				height: var(--widthTitleLeft);
 			}
 			.titlerotate > h1{
 				display: flex;
@@ -221,7 +226,7 @@
 					<label for="ip">IP address :</label>
 					<input type="text" id="ip" name="ip" value="" placeholder="Ex: 192.168.1.17"><br><br>
 					<label for="port">Port :</label>
-					<input type="text" id="port" name="port" value="" placeholder="Ex: 4444"><br><br>
+					<input type="text" id="port" name="port" value="" placeholder="Ex: 4455"><br><br>
 					<label for="password">Password :</label>
 					<input type="text" id="password" name="password" value="" placeholder="Ex: myp@ssw0rd"> (if authentication is enabled)<br><br>
 					<label for="limit">Max amount of scenes ?</label>
