@@ -605,14 +605,15 @@ var btncolorlist = [
 	['url(images/blank_yellow_button.png)', '0px 0px 30px rgb(255,255,0)'],
 	['url(images/blank_green_button.png)', '0px 0px 30px rgb(0,255,0)']
 ];
-function btnRules(btn){		// rule 456789 in stylesheet
+var btn1Rule = 5;
+function btnRules(btn){		// rule 5678910 in stylesheet
 	switch(btn){
-		case 'auxbtn': return 4; break;
-		case 'pgmbtn': return 5; break;
-		case 'pvwbtn': return 6; break;
-		case 'srcbtn': return 7; break;
-		case 'trnbtn': return 8; break;
-		case 'mutbtn': return 9; break;
+		case 'auxbtn': return btn1Rule; break;
+		case 'pgmbtn': return btn1Rule+1; break;
+		case 'pvwbtn': return btn1Rule+2; break;
+		case 'srcbtn': return btn1Rule+3; break;
+		case 'trnbtn': return btn1Rule+4; break;
+		case 'mutbtn': return btn1Rule+5; break;
 	}
 }
 
@@ -620,8 +621,8 @@ function btnRules(btn){		// rule 456789 in stylesheet
 var listBtncolor = [3,4,6,0,5,4]
 function changecolor(btn){
 	rulesNum = btnRules(btn);
-	btncolor = ++listBtncolor[rulesNum-4];
-	listHue[rulesNum-4] = 0; //reset Hue rotate
+	btncolor = ++listBtncolor[rulesNum - btn1Rule];
+	listHue[rulesNum - btn1Rule] = 0; //reset Hue rotate
 	var styleee = document.styleSheets[0].cssRules[rulesNum].style; //Style sheet sequence related
 	styleee.backgroundImage = btncolorlist[btncolor%7][0];
 	styleee.boxShadow = btncolorlist[btncolor%7][1];
@@ -641,7 +642,7 @@ function up(){
 }
 function changehue(){
 	rulesNum = btnRules(btn);
-	hue = ++listHue[rulesNum-4]*5;
+	hue = ++listHue[rulesNum - btn1Rule]*5;
 	var styleee = document.styleSheets[0].cssRules[rulesNum].style;
 	styleee.filter = 'hue-rotate('+hue+'deg)';
 }
