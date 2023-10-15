@@ -185,7 +185,7 @@ obs.connect(
 	var aux2_counter = 0;
 	isthereaux = !1;
 	isthereaux2 = !1;
-    data.scenes.forEach(scene => {
+    data.scenes.slice().reverse().forEach(scene => {
         if (scene_counter < scene_counter_limit) {
             document.getElementById("lesbuttons_PGM").innerHTML += "<input class='buttonscene classicbutton buttonscenepgm' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='pgm_" + scene.sceneName + "' onclick='switch_pgm(this);' type='submit' name='" + scene.sceneName + "' value='" + scene.sceneName + "'/>";
             document.getElementById("lesbuttons_PVW").innerHTML += "<input class='buttonscene classicbutton buttonscenepvw' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='pvw_" + scene.sceneName + "' onclick='switch_pvw(this);' type='submit' name='" + scene.sceneName + "' value='" + scene.sceneName + "'/>";
