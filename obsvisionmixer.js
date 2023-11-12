@@ -489,7 +489,7 @@ function getCurrentTransition(){
 function drawSourceBtn(sceneName){
 	document.getElementById("lesbuttons_SRC").innerHTML = "";
 	obs.call('GetSceneItemList', {sceneName: sceneName}).then(data => {
-		data.sceneItems.forEach(source => {
+		data.sceneItems.slice().reverse().forEach(source => {
 		document.getElementById("lesbuttons_SRC").innerHTML += "<input class='buttonscene classicbutton buttonscenesrc' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='src_" + source.sceneItemId + "' onclick='switch_src(this," + source.sceneItemId + ");' type='submit' name='" + source.sourceName + "' value='" + source.sourceName + "'/>";
 			if(source.sceneItemEnabled == true){
 				colorSRC(document.getElementById("src_" + source.sceneItemId), true);
@@ -500,7 +500,7 @@ function drawSourceBtn(sceneName){
 
 function drawAuxBtn(sceneName, prefix1, prefix2, counter){
 	obs.call('GetSceneItemList', {sceneName: sceneName}).then(data => {
-		data.sceneItems.forEach(source => {
+		data.sceneItems.slice().reverse().forEach(source => {
 			if (counter < scene_counter_limit) {
 				document.getElementById("lesbuttons_" + prefix2).innerHTML += "<input class='buttonscene classicbutton buttonscene" + prefix1 + "' style='margin: " + btn_margin + "px " + btn_margin + "px;' id='" + prefix1 + "_" + source.sceneItemId + "' onclick='switch_aux(this," + source.sceneItemId + ");' type='submit' name='" + source.sourceName + "' value='" + source.sourceName + "'/>";
 				if(source.sceneItemEnabled == true){
